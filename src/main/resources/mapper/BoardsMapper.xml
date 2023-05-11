@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.board.jdi_board.mapper.BoardsMapper">
+    <resultMap id="boardsMap" type="BoardsDto">
+        <id column="b_id" property="bId"/>
+        <result column="title" property="title"/>
+        <result column="content" property="content"/>
+        <result column="post_time" property="postTime"/>
+    </resultMap>
+    <select id="findAll" resultMap="boardsMap">
+        SELECT *
+        FROM boards
+    </select>
+    <select id="findById" resultType="com.board.jdi_board.dto.BoardsDto">
+
+    </select>
+</mapper>

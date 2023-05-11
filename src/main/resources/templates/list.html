@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+</head>
+<body>
+
+<main>
+    <table>
+        <thead>
+            <tr>
+                <th>제 목</th>
+                <th>날 짜</th>
+                <th>상 세</th>
+            </tr>
+        </thead>
+        <tbody>
+            <th:block th:each="board:${boards}">
+                <tr>
+                    <td th:text="${board.getTitle()}"></td>
+                    <td th:text="${board.getPostTime()}"></td>
+                    <td><a href="">상세</a></td>
+                </tr>
+            </th:block>
+        </tbody>
+    </table>
+</main>
+
+<footer></footer>
+</body>
+</html>
