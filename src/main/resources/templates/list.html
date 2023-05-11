@@ -3,30 +3,28 @@
 
 <head>
     <meta charset="UTF-8">
+    <title>게시글 리스트</title>
 </head>
 <body>
-
-<main>
-    <table>
-        <thead>
-            <tr>
-                <th>제 목</th>
-                <th>날 짜</th>
-                <th>상 세</th>
-            </tr>
-        </thead>
-        <tbody>
-            <th:block th:each="board:${boards}">
+    <main>
+        <table style="margin: auto">
+            <thead>
                 <tr>
-                    <td th:text="${board.getTitle()}"></td>
-                    <td th:text="${board.getPostTime()}"></td>
-                    <td><a th:href="@{{bId}/detail.do (bId=${board.getBId()})}" >상세</a></td>
+                    <th>제 목</th>
+                    <th>날 짜</th>
+                    <th>상 세</th>
                 </tr>
-            </th:block>
-        </tbody>
-    </table>
-</main>
-
-<footer></footer>
+            </thead>
+            <tbody>
+                <th:block th:each="board:${boards}">
+                    <tr>
+                        <td th:text="${board.getTitle()}"></td>
+                        <td th:text="${board.getPostTime()}"></td>
+                        <td><a th:href="@{{bId}/detail.do (bId=${board.getBId()})}">상세</a></td>
+                    </tr>
+                </th:block>
+            </tbody>
+        </table>
+    </main>
 </body>
 </html>

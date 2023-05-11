@@ -3,19 +3,16 @@
 
 <head>
     <meta charset="UTF-8">
-    <title></title>
+    <title>게시글 상세</title>
 </head>
 <body>
+    <main>
 
-<main>
+        <div th:text="${board.getTitle()}"></div>
+        <div th:text="${board.getContent()}"></div>
+        <div th:text="${board.getPostTime()}"></div>
+        <div th:text="${terms}"></div>
 
-    <div th:text="${board.getTitle()}"></div>
-    <div th:text="${board.getContent()}"></div>
-    <div th:text="${board.getPostTime()}"></div>
-    <div th:text="${terms}"></div>
-
-</main>
-
-<footer></footer>
+    </main>
 </body>
 </html>

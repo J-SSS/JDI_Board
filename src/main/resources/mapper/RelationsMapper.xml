@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.board.jdi_board.mapper.RelationsMapper">
+    <resultMap id="relationsMap" type="relationsDto">
+        <id column="br_id" property="brId"/>
+        <result column="terms" property="terms"/>
+        <result column="th_idf" property="thIdf"/>
+        <result column="is_total" property="isTotal"/>
+    </resultMap>
+
+    <insert id="insertOne" useGeneratedKeys="true" keyProperty="brId">
+        INSERT INTO relations (b_id, terms, tf_idf, is_total) VALUE (#{bId}, #{terms}, #{thIdf}, #{isTotal})
+    </insert>
+    <update id="updateOne">
+
+    </update>
+</mapper>
