@@ -16,4 +16,9 @@ public class BoardsServiceImpl implements BoardsService {
     public List<BoardsDto> list() {
         return boardsMapper.findAll();
     }
+
+    @Override
+    public BoardsDto detail(int bId) {
+        return boardsMapper.findById(bId);
+    }
 }

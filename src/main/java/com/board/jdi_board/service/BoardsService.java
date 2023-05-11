@@ -7,4 +7,6 @@ import java.util.List;
 public interface BoardsService {
 
     List<BoardsDto> list();
+
+    BoardsDto detail(int bId);
 }

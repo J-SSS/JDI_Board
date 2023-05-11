@@ -10,5 +10,5 @@ public interface BoardsMapper {
 
     List<BoardsDto> findAll();
 
-    BoardsDto findById();
+    BoardsDto findById(int bId);
 }

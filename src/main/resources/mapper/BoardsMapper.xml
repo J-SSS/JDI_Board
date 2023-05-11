@@ -11,7 +11,9 @@
         SELECT *
         FROM boards
     </select>
-    <select id="findById" resultType="com.board.jdi_board.dto.BoardsDto">
-
+    <select id="findById" resultMap="boardsMap">
+        SELECT *
+        FROM boards
+        WHERE b_id = #{bId}
     </select>
 </mapper>
