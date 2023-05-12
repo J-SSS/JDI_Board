@@ -1,6 +1,17 @@
 ## TH-IDF 기법과 Cosine Similarity 분석을 활용한 연관 게시글 구현
 <hr>
 
+##### *) 참고한 내용
+1. 자연어 처리 및 유사도 분석
+  - 딥 러닝을 이용한 자연어 처리 입문(안상준, 유원준)
+  - https://wikidocs.net/24603
+  - https://needjarvis.tistory.com/516
+2. TH-IDF 활용한 빈도 분석
+  - https://needjarvis.tistory.com/678
+3. 더미데이터 생성 : ChatGPT
+<hr>
+
+
 ### Ⅰ. 개발환경
 - JAVA / Spring Boot / Thymeleaf
 - MySQL / MyBatis

@@ -5,13 +5,20 @@
         <id column="br_id" property="brId"/>
         <result column="terms" property="terms"/>
         <result column="th_idf" property="thIdf"/>
-        <result column="is_total" property="isTotal"/>
+        <result column="unique_list" property="uniqueList"/>
+        <result column="normal_list" property="normalList"/>
     </resultMap>
 
     <insert id="insertOne" useGeneratedKeys="true" keyProperty="brId">
-        INSERT INTO relations (b_id, terms, tf_idf, is_total) VALUE (#{bId}, #{terms}, #{thIdf}, #{isTotal})
+        INSERT INTO relations (b_id, terms, tf_idf) VALUE (#{bId}, #{terms}, #{thIdf})
     </insert>
     <update id="updateOne">
 
     </update>
+    <select id="findByBrId" resultMap="relationsMap">
+        SELECT * FROM relations WHERE br_id = #{brId};
+    </select>
+    <select id="findAll" resultMap="relationsMap">
+        SELECT * FROM relations;
+    </select>
 </mapper>

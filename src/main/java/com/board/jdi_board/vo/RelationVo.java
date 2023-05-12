@@ -22,7 +22,6 @@ import java.util.List;
 
 @Data
 @Component
-
 public class RelationVo {
     public RelationVo(RelationsService relationsService) {
         this.relationsService = relationsService;
@@ -30,6 +29,7 @@ public class RelationVo {
 
     private RelationsService relationsService;
 
+    // 형태소 추출 테스트용
     public List<String> terms(HashSet<String> totalTerms, String content) {
 
         // 1. OKT 라이브러리로 게시글 내용을 형태소 단위로 분리
@@ -54,30 +54,5 @@ public class RelationVo {
         return myList;
     }
 
-    public void terms2(List<BoardsDto> boards) throws JsonProcessingException {
 
-        for(BoardsDto board : boards){
-            CharSequence normalized = OpenKoreanTextProcessorJava.normalize(board.getContent());
-            Seq<KoreanTokenizer.KoreanToken> tokens = OpenKoreanTextProcessorJava.tokenize(normalized);
-            List<KoreanTokenJava> tokenList = OpenKoreanTextProcessorJava.tokensToJavaKoreanTokenList(tokens);
-
-            List<String> tempList = new ArrayList<>();
-
-            for(KoreanTokenJava t : tokenList){
-                if(t.getPos() == KoreanPosJava.Noun || t.getPos() == KoreanPosJava.Alpha){
-                    tempList.add(t.getText());
-                }
-            }
-            RelationsDto dto = new RelationsDto();
-            dto.setBId(board.getBId());
-            ObjectMapper objectMapper = new ObjectMapper();
-            String jsonString = objectMapper.writeValueAsString(tempList);
-            dto.setTerms(jsonString);
-            relationsService.register(dto);
-
-
-        }
-
-
-    }
 }
