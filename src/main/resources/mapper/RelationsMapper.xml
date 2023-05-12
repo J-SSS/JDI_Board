@@ -6,7 +6,7 @@
         <result column="terms" property="terms"/>
         <result column="th_idf" property="thIdf"/>
         <result column="unique_list" property="uniqueList"/>
-        <result column="normal_list" property="normalList"/>
+        <result column="total_list" property="totalList"/>
     </resultMap>
 
     <insert id="insertOne" useGeneratedKeys="true" keyProperty="brId">

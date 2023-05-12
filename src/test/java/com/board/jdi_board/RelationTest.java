@@ -6,14 +6,12 @@ import com.board.jdi_board.service.BoardsService;
 import com.board.jdi_board.service.RelationsService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.apache.juli.logging.Log;
 import org.junit.jupiter.api.Test;
 import org.openkoreantext.processor.KoreanPosJava;
 import org.openkoreantext.processor.KoreanTokenJava;
 import org.openkoreantext.processor.OpenKoreanTextProcessorJava;
 import org.openkoreantext.processor.tokenizer.KoreanTokenizer;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.json.GsonJsonParser;
 import org.springframework.boot.test.context.SpringBootTest;
 import scala.collection.Seq;
 
@@ -39,24 +37,90 @@ public class RelationTest {
         // Relations 테이블의 모든 데이터를 불러온다
         List<RelationsDto> dtos = relationsService.list();
 
-        // 출현한 모든 명사 형태소를 중복 허용으로 저장한 배열, 중복 없이 저장한 집합
+        // 단어를 중복 없이 저장한 리스트와 단어를 게시글별로 2차원 리스트로 저장한 리스트
         // DB에서 불러와서 Java 객체로 변환
-        String jsonSet = dtos.get(0).getTerms();
-        String jsonList = dtos.get(1).getTerms();
+        String jsonUniqueList = dtos.get(0).getTerms();
+        String jsonTotalList = dtos.get(1).getTerms();
 
-        Set termsSet = new HashSet();
-        List termsList = new ArrayList<>();
-        termsSet = objectMapper.readValue(jsonSet, termsSet.getClass());
-        termsList = objectMapper.readValue(jsonList, termsList.getClass());
+        List<String> termsUnique = new ArrayList<>();
+        List<List<String>> totalList = new ArrayList<>();
+        termsUnique = objectMapper.readValue(jsonUniqueList, termsUnique.getClass());
+        totalList = objectMapper.readValue(jsonTotalList, totalList.getClass());
 
-//        System.out.println("셋" + termsSet);
-//        System.out.println("리스트" + termsList);
+//        System.out.println("토탈셋" + termsUnique);
+//        System.out.println("토탈리스트" + termsNormal.get(2));
 
-        for(String terms : testList){
-            termsSet.add(terms);
-            termsList.add(terms);
+//         // 중복 허용 리스트에는 그냥 넣음
+//         termsNormal.add(noun);
+
+//        List<Double> tfIdfList = new ArrayList<>();
+        Map<Integer, Double> tfIdfMap = new HashMap<>();
+        for(String noun : testList){
+
+            int index = termsUnique.indexOf(noun);
+            double tfidf = tfIdf(noun, testList, totalList);
+
+            // 이 단어가 처음 등장하는 경우 유니크리스트에 추가하고
+            // 본 게시글의 tfidf 리스트에 추가
+            if(index == -1 && tfidf != 0.0){
+                termsUnique.add(noun);
+                tfIdfMap.put(termsUnique.size()-1, tfidf);
+
+            // 이 단어가 이전에도 등장한 경우 유니크리스트에서 그 인덱스를 찾아서
+            // 본 게시글의 tfidf 리스트에 추가
+            } else if(index != -1 && tfidf != 0.0) {
+               tfIdfMap.put(index, tfidf);
+            }
+        }
+        System.out.println("어딨냐" + tfIdfMap);
+            /*
+            System.out.println(noun+tfIdf(noun, testList, totalList));
+            자바0.5827512602444134
+            스프링0.0
+            프로그래밍0.2841246820397375
+            기초0.0
+            강의0.0
+            널리지0.0
+             */
+    }
+    @Test
+    public void test(){
+        List<String> list = new ArrayList<>();
+        list.add(0,"123");
+        list.add(1,"123");
+        System.out.println();
+
+
+    }
+
+    // tf-idf 분석 메서드
+    public double tfIdf(String noun, List<String> terms, List<List<String>> totalList){
+        double thCnt = 0;
+        double idfCnt = 0;
+        double th = 0;
+        double idf = 0;
+
+        // 빈도
+        for (String term : terms){ if (noun.equals(term)) thCnt++; }
+        th =  thCnt / terms.size();
+        // 역빈도
+        for (List<String> list : totalList) {
+            for (String term : list) {
+                if (noun.equals(term)) {
+                    idfCnt++;
+                }
+            }
+        }
+        idf = Math.log(totalList.size() / idfCnt);
+
+        // 역빈도가 60% 이상이면 0을 반환하며 return
+        // 어떤 단어가 이번 케이스에 처음 등장하는 경우 cnt가 0으로 남아 tf-idf가 무한대가 되므로 해당부분 처리
+        double idfRatio = idfCnt / totalList.size();
+        if (idfRatio >= 0.6 || (thCnt == 0 || idfCnt == 0)) {
+            return 0;
         }
 
+        return th*idf;
     }
 
     // 명사인 형태소 추출하는 메서드
@@ -98,7 +162,8 @@ public class RelationTest {
 
         // 형태소 저장위한 배열과 집합
         List<String> totalSet = new ArrayList<>();
-        List<String> totalList = new ArrayList<>();
+//        List<String> totalList = new ArrayList<>();
+        List<List<String>> totalDocument = new ArrayList<>();
 
         // 형태소 추출하여 DB에 넣는 코드
         for(BoardsDto board : boards){
@@ -112,7 +177,6 @@ public class RelationTest {
             for(KoreanTokenJava t : tokenList){
                 if(t.getPos() == KoreanPosJava.Noun || t.getPos() == KoreanPosJava.Alpha){
                     tempList.add(t.getText());
-                    totalList.add(t.getText());
                     totalSet.add(t.getText());
                 }
             }
@@ -125,9 +189,10 @@ public class RelationTest {
             dto.setTerms(jsonString);
             relationsService.register(dto);
 
+            totalDocument.add(tempList);
         }
 
-        // PK 1번인 DB에 total 데이터 저장 (불필요할수도...)
+        // 전체 형태소 정보 저장용
 
         RelationsDto dto = new RelationsDto();
         dto.setBId(1);
@@ -139,8 +204,8 @@ public class RelationTest {
         RelationsDto dto2 = new RelationsDto();
         dto2.setBId(2);
         ObjectMapper objectMapper2 = new ObjectMapper();
-        String jsonString2 = objectMapper2.writeValueAsString(totalList);
-        System.out.println("여기"+totalList);
+        String jsonString2 = objectMapper2.writeValueAsString(totalDocument);
+        System.out.println("여기"+totalDocument);
         dto2.setTerms(jsonString2);
         relationsService.register(dto2);
 
