@@ -18,7 +18,7 @@ CREATE TABLE `boards` (
 
 CREATE TABLE `relations`(
                             `br_id`	int unsigned AUTO_INCREMENT PRIMARY KEY COMMENT 'PK',
-                            `b_id`	int unsigned COMMENT '게시글 FK',
+                            `b_id`	int unsigned UNIQUE COMMENT '게시글 FK',
                             `terms`	TEXT COMMENT '형태소 리스트',
                             `tf_idf` TEXT COMMENT 'TF-IDF 분석치',
                             `unique_list` tinyint NOT NULL DEFAULT 0 COMMENT 'true인 레코드는 모든 게시글의 형태소 리스트를 중복 없는 배열로 저장',
