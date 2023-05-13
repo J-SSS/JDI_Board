@@ -1,4 +1,4 @@
-## TF-IDF 기법과 Cosine Similarity 분석을 활용한 연관 게시글 구현
+# 📌. TF-IDF 기법과 Cosine Similarity 분석을 활용한 연관 게시글 구현
 <hr>
 
 ##### *) 참고한 내용
@@ -49,7 +49,7 @@
   - 추출한 키워드에 TF-IDF를 적용하고 그 결과를 행렬화하여 각 레코드의 tf_idf 칼럼에 추가한다<br><u>이 때, IDF가 0.6이상인 키워드는 제외한다</u>
 <br><br>
 #### 3. 적용 - Cosine Similarity 분석
-![222](https://github.com/J-SSS/JDI_Board/assets/118149752/9102d966-b00b-4d0b-b8c3-f78d8c5cdb5d)
+![222](https://github.com/J-SSS/JDI_Board/assets/118149752/c099131b-53b2-4d48-9bee-e2fc5b3ad578)
   - 각 게시글의 TF-IDF 행렬을 Cosine Similarity로 분석하여 연관게시글을 찾는다
   - <u>1. IDF가 0.4이하인 유의미한 키워드로서, <br>2. 두 개 이상의 키워드가 겹치는 경우만을 연관글로 취급한다<br>3. 연관도가 높은 순으로 별개의 테이블에 저장한다</u>
   - 새 게시글이 등록 될 때 마다 TF-IDF 분석의 바탕이 되는 '전체 키워드 데이터'가 변동되므로, 새 게시글 등록시마다 모든 게시글에 대하여 TF-IDF 및 Cosine Similarity 분석을 새로 수행하여 연관게시글 정보를 갱신한다<br>(모든 게시글이 아니라 키워드 교집합을 갖는 게시글만을 갱신해줘도 될듯하나 시간관계상 생략)  
