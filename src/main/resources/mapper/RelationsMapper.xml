@@ -4,19 +4,24 @@
     <resultMap id="relationsMap" type="relationsDto">
         <id column="br_id" property="brId"/>
         <result column="terms" property="terms"/>
-        <result column="th_idf" property="thIdf"/>
-        <result column="unique_list" property="uniqueList"/>
-        <result column="total_list" property="totalList"/>
+        <result column="tf_idf" property="tfIdf"/>
+        <result column="rel_b_id_list" property="relBIdList"/>
     </resultMap>
 
     <insert id="insertOne" useGeneratedKeys="true" keyProperty="brId">
-        INSERT INTO relations (b_id, terms, tf_idf) VALUE (#{bId}, #{terms}, #{thIdf})
+        INSERT INTO relations (b_id, terms, tf_idf, rel_b_id_list) VALUE (#{bId}, #{terms}, #{tfIdf}, #{relBIdList})
     </insert>
     <update id="updateOne">
         UPDATE relations SET tf_idf=#{thIdf} WHERE br_id = #{brId}
     </update>
+    <update id="updateRel">
+        UPDATE relations SET rel_b_id_list=#{relBIdList} WHERE br_id = #{brId}
+    </update>
     <select id="findByBrId" resultMap="relationsMap">
         SELECT * FROM relations WHERE br_id = #{brId};
+    </select>
+    <select id="findByBId" resultType="string">
+        SELECT rel_b_id_list FROM relations WHERE b_id = #{bId};
     </select>
     <select id="findAll" resultMap="relationsMap">
         SELECT * FROM relations;

@@ -6,12 +6,19 @@
         <result column="title" property="title"/>
         <result column="content" property="content"/>
         <result column="post_time" property="postTime"/>
+        <association property="relList"
+                     select="com.board.jdi_board.mapper.RelationsMapper.findByBId"
+                     column="b_id"
+                     fetchType="lazy"/>
     </resultMap>
+    <insert id="insertOne" useGeneratedKeys="true" keyProperty="bId">
+        INSERT INTO boards (title, content) VALUE (#{title}, #{content})
+    </insert>
     <select id="findAll" resultMap="boardsMap">
         SELECT *
         FROM boards
     </select>
-    <select id="findById" resultMap="boardsMap">
+    <select id="findByBId" resultMap="boardsMap">
         SELECT *
         FROM boards
         WHERE b_id = #{bId}

@@ -31,4 +31,8 @@ public class RelationsImpl implements RelationsService {
     public int modify(RelationsDto relationsDto) {
         return relationsMapper.updateOne(relationsDto);
     }
+
+    @Override
+    public int updateRelList(RelationsDto relationsDto) {return relationsMapper.updateRel(relationsDto);
+    }
 }

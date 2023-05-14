@@ -18,7 +18,12 @@ public class BoardsServiceImpl implements BoardsService {
     }
 
     @Override
+    public int register(BoardsDto boardsDto) {
+        return boardsMapper.insertOne(boardsDto);
+    }
+
+    @Override
     public BoardsDto detail(int bId) {
-        return boardsMapper.findById(bId);
+        return boardsMapper.findByBId(bId);
     }
 }

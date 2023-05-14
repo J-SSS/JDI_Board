@@ -10,4 +10,5 @@ public interface RelationsService {
     RelationsDto detail(int brId);
     int register(RelationsDto relationsDto);
     int modify(RelationsDto relationsDto);
+    int updateRelList(RelationsDto relationsDto);
 }

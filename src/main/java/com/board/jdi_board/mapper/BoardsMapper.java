@@ -9,6 +9,8 @@ import java.util.List;
 public interface BoardsMapper {
 
     List<BoardsDto> findAll();
+    int insertOne(BoardsDto boardsDto);
 
-    BoardsDto findById(int bId);
+    BoardsDto findByBId(int bId);
+
 }

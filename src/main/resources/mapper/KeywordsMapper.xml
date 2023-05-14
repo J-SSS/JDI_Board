@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.board.jdi_board.mapper.KeywordsMapper">
+    <resultMap id="keywordsMap" type="KeywordsDto">
+        <id column="k_id" property="kId"/>
+        <result column="unique_list" property="uniqueList"/>
+        <result column="total_list" property="totalList"/>
+        <result column="map_list" property="mapList"/>
+        <result column="is_unique" property="isUnique"/>
+        <result column="is_total" property="isTotal"/>
+        <result column="is_map" property="isMap"/>
+    </resultMap>
+    <insert id="insertOne">
+        INSERT INTO keywords (unique_list, total_list, map_list) VALUE (#{uniqueList},#{totalList},#{mapList});
+    </insert>
+    <update id="updateOne">
+        UPDATE keywords SET unique_list=#{uniqueList}, total_list=#{totalList}, map_list=#{mapList} WHERE k_id=#{kId};
+    </update>
+    <select id="findAll" resultMap="keywordsMap">
+        SELECT * FROM keywords;
+    </select>
+    <select id="findByKId" resultMap="keywordsMap">
+        SELECT * FROM keywords WHERE k_id = #{kId};
+    </select>
+</mapper>

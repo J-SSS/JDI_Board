@@ -6,13 +6,23 @@
     <title>게시글 상세</title>
 </head>
 <body>
-    <main>
-
-        <div th:text="${board.getTitle()}"></div>
-        <div th:text="${board.getContent()}"></div>
-        <div th:text="${board.getPostTime()}"></div>
-        <div th:text="${terms}"></div>
-
+    <main style="margin-left: 30%">
+        <section style="width: 50%">
+            <h2 th:text="${board.getTitle()}"></h2>
+            <h3 th:text="${board.getContent()}"></h3>
+            <h4 th:text="${board.getPostTime()}"></h4>
+            <hr>
+        </section>
+        <h2>연관 게시글</h2>
+        <th:block th:each="rel:${rels}">
+            <a th:href="@{/board/{bId}/detail.do (bId=${rel.getBId()})}">
+            <section style="background-color: whitesmoke; width: 50%; margin-bottom: 30px">
+                <h3 th:text="${rel.getTitle()}"></h3>
+                <h4 th:text="${rel.getContent()}"></h4>
+                <hr>
+            </section>
+            </a>
+        </th:block>
     </main>
 </body>
 </html>

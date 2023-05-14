@@ -1,9 +1,13 @@
 package com.board.jdi_board;
 
 import com.board.jdi_board.dto.BoardsDto;
+import com.board.jdi_board.dto.KeywordsDto;
 import com.board.jdi_board.dto.RelationsDto;
 import com.board.jdi_board.service.BoardsService;
+import com.board.jdi_board.service.KeywordsService;
+import com.board.jdi_board.service.RelationsImpl;
 import com.board.jdi_board.service.RelationsService;
+import com.board.jdi_board.vo.CosineSimilarity;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
@@ -13,6 +17,7 @@ import org.openkoreantext.processor.OpenKoreanTextProcessorJava;
 import org.openkoreantext.processor.tokenizer.KoreanTokenizer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import scala.Char;
 import scala.collection.Seq;
 
 import java.util.*;
@@ -22,58 +27,97 @@ public class RelationTest {
     @Autowired
     RelationsService relationsService;
     @Autowired
+    KeywordsService keywordsService;
+    @Autowired
     BoardsService boardsService;
     ObjectMapper objectMapper = new ObjectMapper();
 
-    // 새 게시글 등록시 연관도 분석 테스트용
-    private String testString = "자바 스프링 프로그래밍 기초 강의";
-
-    // testString을 nounExtractor() 메서드에 넣고 돌리면 나와야 되는 결과물..
-    private List<String> testList = new ArrayList<>(Arrays.asList("자바","스프링","프로그래밍","기초", "강의", "널리지"));
+//    // 새 게시글 등록시 연관도 분석 테스트용
+//    private String testString = "자바 스프링 프로그래밍 기초 강의";
+//
+//    // testString을 nounExtractor() 메서드에 넣고 돌리면 나와야 되는 결과물..
+//    private List<String> testList = new ArrayList<>(Arrays.asList("자바","스프링","프로그래밍","기초", "강의", "널리지"));
 
     @Test
     public void insertTest() throws JsonProcessingException {
 
-        // Relations 테이블의 모든 데이터를 불러온다
-        List<RelationsDto> dtos = relationsService.list();
+        // 새로 생성될 게시물의 내용부분을 매개변수로 받아서 실행되는 상황을 가정..
+        // 새 게시글의 컨텐츠 내용
+        String testString = "자바 스프링 프로그래밍 기초 강의입니다 어쩌구저쩌구";
+        // testString을 nounExtractor() 메서드에 넣고 돌려서 키워드 단어 리스트만 추출
+        List<String> testList = new ArrayList<>(Arrays.asList("자바","스프링","프로그래밍","기초", "강의", "널리지"));
 
-        // 1. 단어를 중복 없이 저장한 리스트와, 2. 단어를 게시글별로 2차원 리스트로 저장한 리스트
+        // KeyWords 테이블에서 유사도분석을 위한 정보를 불러온다
+        KeywordsDto keywordsDto = keywordsService.detail(1);
+
+        // 1. 단어를 중복 없이 저장한 리스트와
+        // 2. 단어를 게시글별로 2차원 리스트로 저장한 리스트
+        // 3. 각 게시글의 tf-idf 행렬을 저장한 맵
         // DB에서 불러와서 Java 객체로 변환
-        String jsonUniqueList = dtos.get(0).getTerms();
-        String jsonTotalList = dtos.get(1).getTerms();
+        String jsonUniqueList = keywordsDto.getUniqueList();
+        String jsonTotalList = keywordsDto.getTotalList();
+        String jsonMapList = keywordsDto.getMapList();
 
-        List<String> termsUnique = new ArrayList<>();
+        List<String> uniqueList = new ArrayList<>();
         List<List<String>> totalList = new ArrayList<>();
-        termsUnique = objectMapper.readValue(jsonUniqueList, termsUnique.getClass());
+        Map<String,Map<String,Double>> mapList = new LinkedHashMap<>();
+
+        uniqueList = objectMapper.readValue(jsonUniqueList, uniqueList.getClass());
         totalList = objectMapper.readValue(jsonTotalList, totalList.getClass());
+        mapList = objectMapper.readValue(jsonMapList, mapList.getClass());
 
-//        System.out.println("토탈셋" + termsUnique);
-//        System.out.println("토탈리스트" + termsNormal.get(2));
+        totalList.add(testList);
 
-//         // 중복 허용 리스트에는 그냥 넣음
-//         termsNormal.add(noun);
+        // 새 게시물의 TF-IDF 행렬
+        Map<String, Double> thisMap = tfIdfMap(uniqueList, totalList, testList);
 
-//        List<Double> tfIdfList = new ArrayList<>();
+        CosineSimilarity cos = new CosineSimilarity();
+//        System.out.println("cos값 = " + cos.cosineSimilarity(thisMap,mapList.get("11")));
 
-        Map<Integer, Double> tfIdfMap = new HashMap<>();
-        for(String noun : testList){
+        Map<Integer,Double> relationMap = new HashMap<>();
+
+        for( String key : mapList.keySet() ){
+            double result = cos.cosineSimilarity(mapList.get("1"),mapList.get(key));
+                    if(result != 0.0 && result != 1.0){
+//                        System.out.println("게시글 Id : "+ key + " 유사도 " + result );
+                        relationMap.put(Integer.valueOf(key),result);
+                    }
+        }
+
+        // 연관도 높은 순으로 bId 담은 리스트
+        List<Integer> orderedKey = new ArrayList<>(relationMap.keySet());
+        Collections.sort(orderedKey, (value1, value2) -> (relationMap.get(value2).compareTo(relationMap.get(value1))));
+        String orderedString = jsonParser(orderedKey);
+
+    }
+
+    // json문자열로 파싱하는 메서드
+    public String jsonParser(Object o) throws JsonProcessingException {
+        String jsonString = objectMapper.writeValueAsString(o);
+        return jsonString;
+    }
+
+    // TF-IDF 행렬을 만드는 메서드
+    // 모든 단어 정보를 담은 유니크 리스트와, 각 게시글별 단어에 대한 2차원 리스트, TF-IDF 추출 대상이 되는 게시글의 단어리스틀을 매개변수로 받음
+    public Map<String, Double> tfIdfMap(List<String> termsUnique, List<List<String>> totalList, List<String> thisTermsList){
+        Map<String, Double> tfIdfMap = new HashMap<>();
+        for(String noun : thisTermsList){
 
             int index = termsUnique.indexOf(noun);
-            double tfidf = tfIdf(noun, testList, totalList);
+            double tfidf = tfIdf(noun, thisTermsList, totalList);
 
             // 이 단어가 이번 게시글에서 처음 등장하는 경우 유니크리스트에 추가하고
             // TF-IDF행렬로 만듦
             if(index == -1 && tfidf != 0.0){
                 termsUnique.add(noun);
-                tfIdfMap.put(termsUnique.size()-1, tfidf);
+                tfIdfMap.put(String.valueOf(termsUnique.size()-1), tfidf);
 
-            // 이 단어가 이전에도 등장한 경우 유니크리스트에서 그 인덱스를 찾아서
-            // TF-IDF행렬로 만듦
+                // 이 단어가 이전에도 등장한 경우 유니크리스트에서 그 인덱스를 찾아서
+                // TF-IDF행렬로 만듦
             } else if(index != -1 && tfidf != 0.0) {
-               tfIdfMap.put(index, tfidf);
+                tfIdfMap.put(String.valueOf(index), tfidf);
             }
         }
-        System.out.println("어딨냐" + tfIdfMap);
             /*
             System.out.println(noun+tfIdf(noun, testList, totalList));
             자바0.5827512602444134
@@ -82,16 +126,12 @@ public class RelationTest {
             기초0.0
             강의0.0
             널리지0.0
+            System.out.println("어딨어" + tfIdfMap);
              */
-    }
-
-    // TF-IDF 행렬을 만드는 메서드
-    // 모든 단어 정보를 담은 유니크 리스트와, TF-IDF 추출 대상이 되는 게시글의 단어리스틀을 매개변수로 받음
-    public Map<Integer, Double> tfIdfMap(){
-        Map<Integer, Double> tfIdfMap = new HashMap<>();
-
         return tfIdfMap;
     }
+    
+
 
     // tf-idf 분석 메서드
     public double tfIdf(String noun, List<String> terms, List<List<String>> totalList){
@@ -144,6 +184,7 @@ public class RelationTest {
     }
 
 
+
 //    @Test
 //    public void jsonToJava() throws JsonProcessingException {
 //        ObjectMapper objectMapper = new ObjectMapper();
@@ -163,8 +204,8 @@ public class RelationTest {
 
         // 형태소 저장위한 배열과 집합
         List<String> totalSet = new ArrayList<>();
-//        List<String> totalList = new ArrayList<>();
         List<List<String>> totalDocument = new ArrayList<>();
+
 
         // 형태소 추출하여 DB에 넣는 코드
         for(BoardsDto board : boards){
@@ -193,23 +234,15 @@ public class RelationTest {
             totalDocument.add(tempList);
         }
 
-        // 전체 단어 정보 저장용
+        // keyword테이블에 중복 없는 키워드리스트, 각 게시글별 2차원 키워드 리스트, tf-idf 행렬 리스트 입력
+        KeywordsDto dtoForUnique = new KeywordsDto();
+        String jsonStringUnique = objectMapper.writeValueAsString(totalSet.stream().distinct().toList());
+        String jsonStringTotal = objectMapper.writeValueAsString(totalDocument);
 
-        RelationsDto dtoForUnique = new RelationsDto();
-        dtoForUnique.setBId(1);
-        ObjectMapper objectMapper = new ObjectMapper();
-        String jsonString = objectMapper.writeValueAsString(totalSet.stream().distinct().toList());
-        dtoForUnique.setTerms(jsonString);
-        relationsService.register(dtoForUnique);
-
-        RelationsDto dtoForTotalList = new RelationsDto();
-        dtoForTotalList.setBId(2);
-        ObjectMapper objectMapper2 = new ObjectMapper();
-        String jsonString2 = objectMapper2.writeValueAsString(totalDocument);
-        System.out.println("여기"+totalDocument);
-        dtoForTotalList.setTerms(jsonString2);
-        relationsService.register(dtoForTotalList);
-
+        dtoForUnique.setUniqueList(jsonStringUnique);
+        dtoForUnique.setTotalList(jsonStringTotal);
+        dtoForUnique.setMapList("temp");
+        keywordsService.register(dtoForUnique);
     }
 
     // TF-IDF 행렬 더미데이터 입력용
@@ -218,22 +251,26 @@ public class RelationTest {
 
         // Relations 테이블의 모든 데이터를 불러온다
         List<RelationsDto> dtos = relationsService.list();
+        List<KeywordsDto> keywordsDto = keywordsService.list();
 
         // 1. 단어를 중복 없이 저장한 리스트와, 2. 단어를 게시글별로 2차원 리스트로 저장한 리스트
         // DB에서 불러와서 Java 객체로 변환
-        String jsonUniqueList = dtos.get(0).getTerms();
-        String jsonTotalList = dtos.get(1).getTerms();
+        String jsonUniqueList = keywordsDto.get(0).getUniqueList();
+        String jsonTotalList = keywordsDto.get(0).getTotalList();
 
         List<String> termsUnique = new ArrayList<>();
         List<List<String>> totalList = new ArrayList<>();
         termsUnique = objectMapper.readValue(jsonUniqueList, termsUnique.getClass());
         totalList = objectMapper.readValue(jsonTotalList, totalList.getClass());
 
+        Map<Integer,Map<Integer,Double>> totalMap = new HashMap<>();
+
 //        System.out.println("토탈셋" + termsUnique);
 //        System.out.println("토탈리스트" + termsNormal.get(2));
 
-        for(int i = 2 ; i<dtos.size() ; i++){
+        for(int i = 0 ; i<dtos.size() ; i++){
             int pk = dtos.get(i).getBrId();
+            int fk = dtos.get(i).getBId();
             List<String> termsList = new ArrayList<>();
             termsList = objectMapper.readValue(dtos.get(i).getTerms(), termsList.getClass());
             Map<Integer, Double> tfIdfMap = new HashMap<>();
@@ -255,12 +292,13 @@ public class RelationTest {
                 }
 
             }
+            System.out.println("fk123 = " + fk);
+            totalMap.put(pk,tfIdfMap);
 
             RelationsDto dtoForTfIdf = new RelationsDto();
             dtoForTfIdf.setBrId(pk);
-            ObjectMapper objectMapper = new ObjectMapper();
             String jsonString = objectMapper.writeValueAsString(tfIdfMap);
-            dtoForTfIdf.setThIdf(jsonString);
+            dtoForTfIdf.setTfIdf(jsonString);
             relationsService.modify(dtoForTfIdf);
 
             System.out.println(" =============== ");
@@ -270,6 +308,60 @@ public class RelationTest {
             System.out.println(" =============== ");
 
         }// 외부for
+
+        KeywordsDto kDto = new KeywordsDto();
+        String jsonStringForMap = objectMapper.writeValueAsString(totalMap);
+        kDto.setKId(1);
+        kDto.setMapList(jsonStringForMap);
+        keywordsService.modify(kDto);
+    }
+
+    //연관글 더미 입력용
+    @Test
+    public void relationDummy() throws JsonProcessingException {
+
+        KeywordsDto keywordsDto = keywordsService.detail(1);
+
+        String jsonUniqueList = keywordsDto.getUniqueList();
+        String jsonTotalList = keywordsDto.getTotalList();
+        String jsonMapList = keywordsDto.getMapList();
+
+        List<String> uniqueList = new ArrayList<>();
+        List<List<String>> totalList = new ArrayList<>();
+        Map<String,Map<String,Double>> mapList = new LinkedHashMap<>();
+
+        uniqueList = objectMapper.readValue(jsonUniqueList, uniqueList.getClass());
+        totalList = objectMapper.readValue(jsonTotalList, totalList.getClass());
+        mapList = objectMapper.readValue(jsonMapList, mapList.getClass());
+
+        CosineSimilarity cos = new CosineSimilarity();
+
+        List<RelationsDto> dtos = relationsService.list();
+        for(RelationsDto dto : dtos){
+            RelationsDto relationsDto = new RelationsDto();
+            int pk = dto.getBrId();
+            String jsonMap = dto.getTfIdf();
+            Map<String,Double> tfidfMap = new LinkedHashMap<>();
+            tfidfMap = objectMapper.readValue(jsonMap, tfidfMap.getClass());
+            Map<Integer,Double> relationMap = new HashMap<>();
+
+            for( String key : mapList.keySet() ){
+                if(Integer.parseInt(key)!=pk){
+                    double result = cos.cosineSimilarity(tfidfMap,mapList.get(key));
+                    if(result != 0.0 && result != 1.0){
+                        relationMap.put(Integer.valueOf(key),result);
+                    }
+                }
+            }
+
+            List<Integer> orderedKey = new ArrayList<>(relationMap.keySet());
+            Collections.sort(orderedKey, (value1, value2) -> (relationMap.get(value2).compareTo(relationMap.get(value1))));
+            String orderedString = jsonParser(orderedKey);
+
+            relationsDto.setBrId(pk);
+            relationsDto.setRelBIdList(orderedString);
+            relationsService.updateRelList(relationsDto);
+        }
     }
 
 
