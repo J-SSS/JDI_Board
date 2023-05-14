@@ -53,7 +53,7 @@
   - 각 단어는 K 테이블의 uniqueList에도 존재하며, 중복을 제거한 리스트이기에 여기서의 index를 해당 단어의 고유한 Key로 취급할 수 있다. 이를 이용하면 각 게시글의 TF-IDF 결과를 다른 게시글과 비교하여 행렬처럼 다루는 것이 가능하다
 <br><br>
 #### 3. 적용 - Cosine Similarity 분석
-![2222](https://github.com/J-SSS/JDI_Board/assets/118149752/3939306f-c893-41fe-8aea-645c30801097)
+![2222](https://github.com/J-SSS/JDI_Board/assets/118149752/a6d400fd-cacb-41f4-9863-c61d576e5349)
   - 각 게시글의 TF-IDF 행렬을 Cosine Similarity로 분석하여 연관게시글을 찾는다
   - ***(조건1)*** IDF가 0.4이하인 유의미한 키워드로서, ***📂. vo/RelationVo.java : 190*** <br> 
   - ***(조건2)*** 두 개 이상의 키워드가 겹치는 경우만을 연관글로 취급한다 ***📂. vo/CosineSimilarity.java : 14*** <br> 
