@@ -45,7 +45,7 @@
   - K 테이블의 mapList는 각 게시글의 tf-idf 행렬을 게시글 단위로 저장한 2차원 맵(=행렬)이다
   <br><br>
 #### 2. 적용 - TF-IDF 분석
-![111](https://github.com/J-SSS/JDI_Board/assets/118149752/358f10f5-8f38-44de-bf54-c6aebe49af5b)
+![111](https://github.com/J-SSS/JDI_Board/assets/118149752/a69f9513-071b-4eed-be7b-af0796c495c0)
   - 게시글 본문을 형태소 분석 라이브러리 OKT를 활용하여 분석하고, 명사에 해당하는 형태소만을 연관성 분석을 위한 단어로 추출한다
   - 추출한 각 단어가 K 테이블의 uniqueList에 없을 경우 해당 리스트에 추가하여 단어 목록을 업데이트한다
   - 추출한 단어들을 리스트화하여 K 테이블의 totalList에 저장한다(IDF 분석용 - 각 게시글에 등장한 단어 리스트를 2차원 리스트로 저장)
@@ -53,7 +53,7 @@
   - 각 단어는 K 테이블의 uniqueList에도 존재하며, 중복을 제거한 리스트이기에 여기서의 index를 해당 단어의 고유한 Key로 취급할 수 있다. 이를 이용하면 각 게시글의 TF-IDF 결과를 다른 게시글과 비교하여 행렬처럼 다루는 것이 가능하다
 <br><br>
 #### 3. 적용 - Cosine Similarity 분석
-![222](https://github.com/J-SSS/JDI_Board/assets/118149752/c099131b-53b2-4d48-9bee-e2fc5b3ad578)
+![2222](https://github.com/J-SSS/JDI_Board/assets/118149752/3939306f-c893-41fe-8aea-645c30801097)
   - 각 게시글의 TF-IDF 행렬을 Cosine Similarity로 분석하여 연관게시글을 찾는다
   - ***(조건1)*** IDF가 0.4이하인 유의미한 키워드로서, ***📂. vo/RelationVo.java : 190*** <br> 
   - ***(조건2)*** 두 개 이상의 키워드가 겹치는 경우만을 연관글로 취급한다 ***📂. vo/CosineSimilarity.java : 14*** <br> 
