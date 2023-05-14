@@ -50,14 +50,14 @@
   - 추출한 각 단어가 K 테이블의 uniqueList에 없을 경우 해당 리스트에 추가하여 단어 목록을 업데이트한다
   - 추출한 단어들을 리스트화하여 K 테이블의 totalList에 저장한다(IDF 분석용 - 각 게시글에 등장한 단어 리스트를 2차원 리스트로 저장)
   - 추출한 각 단어에 TF-IDF를 적용하고 그 결과를 각 레코드의 tf_idf 칼럼에 추가한다<br><u>이 때, IDF가 0.6이상인 키워드는 제외한다</u>
-  - 각 단어는 K 테이블의 uniqueList에도 존재하며 그 index가 해당 단어의 고유한 Key가 된다. 이를 이용해 각 게시글의 tf-idf 값을 행렬처럼 구조화 할 수 있다
+  - 각 단어는 K 테이블의 uniqueList에도 존재하며, 중복 없는 리스트이기에 여기서의 index를 해당 단어의 고유한 Key로 취급할 수 있다. 이를 이용하면 각 게시글의 TF-IDF 결과를 다른 게시글과 비교하여 행렬처럼 다루는 것이 가능하다
 <br><br>
 #### 3. 적용 - Cosine Similarity 분석
 ![222](https://github.com/J-SSS/JDI_Board/assets/118149752/c099131b-53b2-4d48-9bee-e2fc5b3ad578)
   - 각 게시글의 TF-IDF 행렬을 Cosine Similarity로 분석하여 연관게시글을 찾는다
-  - ***(조건1)*** IDF가 0.4이하인 유의미한 키워드로서, ***📂. vo/relationVo.java : 190*** <br> 
-  - ***(조건2)*** 두 개 이상의 키워드가 겹치는 경우만을 연관글로 취급한다 ***📂. vo/Similarity.java : 14*** <br> 
-  - ***(조건3)*** 연관도가 높은 순으로 R 테이블에 저장한다 ***📂. vo/relationVo.java : 79***
+  - ***(조건1)*** IDF가 0.4이하인 유의미한 키워드로서, ***📂. vo/RelationVo.java : 190*** <br> 
+  - ***(조건2)*** 두 개 이상의 키워드가 겹치는 경우만을 연관글로 취급한다 ***📂. vo/CosineSimilarity.java : 14*** <br> 
+  - ***(조건3)*** 연관도가 높은 순으로 R 테이블에 저장한다 ***📂. vo/RelationVo.java : 79***
 <br><br>
 #### 5. 결과
 ![333](https://github.com/J-SSS/JDI_Board/assets/118149752/765f3630-b103-433c-a971-60250f27a762)
