@@ -37,7 +37,7 @@ public class RelationTest {
         // Relations 테이블의 모든 데이터를 불러온다
         List<RelationsDto> dtos = relationsService.list();
 
-        // 단어를 중복 없이 저장한 리스트와 단어를 게시글별로 2차원 리스트로 저장한 리스트
+        // 1. 단어를 중복 없이 저장한 리스트와, 2. 단어를 게시글별로 2차원 리스트로 저장한 리스트
         // DB에서 불러와서 Java 객체로 변환
         String jsonUniqueList = dtos.get(0).getTerms();
         String jsonTotalList = dtos.get(1).getTerms();
@@ -54,20 +54,21 @@ public class RelationTest {
 //         termsNormal.add(noun);
 
 //        List<Double> tfIdfList = new ArrayList<>();
+
         Map<Integer, Double> tfIdfMap = new HashMap<>();
         for(String noun : testList){
 
             int index = termsUnique.indexOf(noun);
             double tfidf = tfIdf(noun, testList, totalList);
 
-            // 이 단어가 처음 등장하는 경우 유니크리스트에 추가하고
-            // 본 게시글의 tfidf 리스트에 추가
+            // 이 단어가 이번 게시글에서 처음 등장하는 경우 유니크리스트에 추가하고
+            // TF-IDF행렬로 만듦
             if(index == -1 && tfidf != 0.0){
                 termsUnique.add(noun);
                 tfIdfMap.put(termsUnique.size()-1, tfidf);
 
             // 이 단어가 이전에도 등장한 경우 유니크리스트에서 그 인덱스를 찾아서
-            // 본 게시글의 tfidf 리스트에 추가
+            // TF-IDF행렬로 만듦
             } else if(index != -1 && tfidf != 0.0) {
                tfIdfMap.put(index, tfidf);
             }
@@ -83,14 +84,13 @@ public class RelationTest {
             널리지0.0
              */
     }
-    @Test
-    public void test(){
-        List<String> list = new ArrayList<>();
-        list.add(0,"123");
-        list.add(1,"123");
-        System.out.println();
 
+    // TF-IDF 행렬을 만드는 메서드
+    // 모든 단어 정보를 담은 유니크 리스트와, TF-IDF 추출 대상이 되는 게시글의 단어리스틀을 매개변수로 받음
+    public Map<Integer, Double> tfIdfMap(){
+        Map<Integer, Double> tfIdfMap = new HashMap<>();
 
+        return tfIdfMap;
     }
 
     // tf-idf 분석 메서드
@@ -143,18 +143,19 @@ public class RelationTest {
 //        return nounList;
     }
 
-    @Test
-    public void jsonToJava() throws JsonProcessingException {
-        ObjectMapper objectMapper = new ObjectMapper();
 
-        String jsonList = relationsService.detail(1).getTerms();
-        List list = new ArrayList<>();
-        list = objectMapper.readValue(jsonList, list.getClass());
-        System.out.println(list);
-    }
+//    @Test
+//    public void jsonToJava() throws JsonProcessingException {
+//        ObjectMapper objectMapper = new ObjectMapper();
+//
+//        String jsonList = relationsService.detail(1).getTerms();
+//        List list = new ArrayList<>();
+//        list = objectMapper.readValue(jsonList, list.getClass());
+//        System.out.println(list);
+//    }
 
     @Test
-    // 더미데이터 추출용
+    // 기존 게시글에 대한 키워드 더미데이터 입력용
     public void termsExtraction() throws JsonProcessingException {
 
         // 전체 게시글 불러오기
@@ -192,24 +193,84 @@ public class RelationTest {
             totalDocument.add(tempList);
         }
 
-        // 전체 형태소 정보 저장용
+        // 전체 단어 정보 저장용
 
-        RelationsDto dto = new RelationsDto();
-        dto.setBId(1);
+        RelationsDto dtoForUnique = new RelationsDto();
+        dtoForUnique.setBId(1);
         ObjectMapper objectMapper = new ObjectMapper();
         String jsonString = objectMapper.writeValueAsString(totalSet.stream().distinct().toList());
-        dto.setTerms(jsonString);
-        relationsService.register(dto);
+        dtoForUnique.setTerms(jsonString);
+        relationsService.register(dtoForUnique);
 
-        RelationsDto dto2 = new RelationsDto();
-        dto2.setBId(2);
+        RelationsDto dtoForTotalList = new RelationsDto();
+        dtoForTotalList.setBId(2);
         ObjectMapper objectMapper2 = new ObjectMapper();
         String jsonString2 = objectMapper2.writeValueAsString(totalDocument);
         System.out.println("여기"+totalDocument);
-        dto2.setTerms(jsonString2);
-        relationsService.register(dto2);
+        dtoForTotalList.setTerms(jsonString2);
+        relationsService.register(dtoForTotalList);
 
     }
 
+    // TF-IDF 행렬 더미데이터 입력용
+    @Test
+    public void tfIdfMapDummy() throws JsonProcessingException {
 
-}
+        // Relations 테이블의 모든 데이터를 불러온다
+        List<RelationsDto> dtos = relationsService.list();
+
+        // 1. 단어를 중복 없이 저장한 리스트와, 2. 단어를 게시글별로 2차원 리스트로 저장한 리스트
+        // DB에서 불러와서 Java 객체로 변환
+        String jsonUniqueList = dtos.get(0).getTerms();
+        String jsonTotalList = dtos.get(1).getTerms();
+
+        List<String> termsUnique = new ArrayList<>();
+        List<List<String>> totalList = new ArrayList<>();
+        termsUnique = objectMapper.readValue(jsonUniqueList, termsUnique.getClass());
+        totalList = objectMapper.readValue(jsonTotalList, totalList.getClass());
+
+//        System.out.println("토탈셋" + termsUnique);
+//        System.out.println("토탈리스트" + termsNormal.get(2));
+
+        for(int i = 2 ; i<dtos.size() ; i++){
+            int pk = dtos.get(i).getBrId();
+            List<String> termsList = new ArrayList<>();
+            termsList = objectMapper.readValue(dtos.get(i).getTerms(), termsList.getClass());
+            Map<Integer, Double> tfIdfMap = new HashMap<>();
+
+            for(String noun : termsList){
+                int index = termsUnique.indexOf(noun);
+                double tfidf = tfIdf(noun, termsList, totalList);
+
+                // 이 단어가 이번 게시글에서 처음 등장하는 경우 유니크리스트에 추가하고
+                // TF-IDF행렬로 만듦
+                if(index == -1 && tfidf != 0.0){
+                    termsUnique.add(noun);
+                    tfIdfMap.put(termsUnique.size()-1, tfidf);
+
+                    // 이 단어가 이전에도 등장한 경우 유니크리스트에서 그 인덱스를 찾아서
+                    // TF-IDF행렬로 만듦
+                } else if(index != -1 && tfidf != 0.0) {
+                    tfIdfMap.put(index, tfidf);
+                }
+
+            }
+
+            RelationsDto dtoForTfIdf = new RelationsDto();
+            dtoForTfIdf.setBrId(pk);
+            ObjectMapper objectMapper = new ObjectMapper();
+            String jsonString = objectMapper.writeValueAsString(tfIdfMap);
+            dtoForTfIdf.setThIdf(jsonString);
+            relationsService.modify(dtoForTfIdf);
+
+            System.out.println(" =============== ");
+            System.out.println("pk = " + pk);
+            System.out.println("tfIdfMap = " + tfIdfMap);
+            System.out.println("jsonString = " + jsonString);
+            System.out.println(" =============== ");
+
+        }// 외부for
+    }
+
+
+} // 클래스 닫기
