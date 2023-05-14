@@ -42,16 +42,21 @@ public class BoardsController {
         return "registerForm";
     }
 
+    // 새 게시글 등록시
     @PostMapping("/register.do")
     public String register(
             @ModelAttribute BoardsDto boardsDto) throws JsonProcessingException
     {
-        boardsService.register(boardsDto);
-        int bId = boardsDto.getBId();
-        String content = boardsDto.getContent();
-        relationVo.insertRelations(bId,content);
-
-        return "redirect:/board/list";
+        int result = boardsService.register(boardsDto);
+        // 새 게시글 등록 성공시 연관게시글 분석 이행
+        if(result == 1) {
+            int bId = boardsDto.getBId();
+            String content = boardsDto.getContent();
+            relationVo.insertRelations(bId,content);
+            return "redirect:/board/list";
+        } else {
+            return "registerForm";
+        }
     }
 
     // 게시글 상세

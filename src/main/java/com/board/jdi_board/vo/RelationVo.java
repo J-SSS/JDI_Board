@@ -41,7 +41,7 @@ public class RelationVo {
      *
      * @throws JsonProcessingException
      */
-    public void insertRelations(int bId, String content) throws JsonProcessingException {
+    public int insertRelations(int bId, String content) throws JsonProcessingException {
 
         // 새 게시글의 단어를 추출한 리스트
         List<String> thisWords = nounExtractor(content);
@@ -101,6 +101,8 @@ public class RelationVo {
         kDto.setMapList(jsonParser(mapList));
         int kResult = keywordsService.modify(kDto);
 
+        if(rResult == 1 && kResult ==1 ) return 1;
+        else return 0;
     }
 
 
