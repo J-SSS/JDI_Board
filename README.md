@@ -1,15 +1,15 @@
-# 📌. TF-IDF 기법과 Cosine Similarity 분석을 활용한 연관 게시글 구현
+# 📌. TF-IDF 기법과 Cosine Similarity 분석을 활용한 연관 게시글 구현(23.05.14)
 <hr>
 
 ##### *) 참고한 내용
 1. 자연어 처리 및 유사도 분석
-  - 딥 러닝을 이용한 자연어 처리 입문(안상준, 유원준)
-  - https://wikidocs.net/24603
-  - https://commons.apache.org/sandbox/commons-text/jacoco/org.apache.commons.text.similarity/CosineSimilarity.java.html
-  - https://needjarvis.tistory.com/516
+   - 딥 러닝을 이용한 자연어 처리 입문(안상준, 유원준)
+   - https://wikidocs.net/24603
+   - https://commons.apache.org/sandbox/commons-text/jacoco/org.apache.commons.text.similarity/CosineSimilarity.java.html
+   - https://needjarvis.tistory.com/516
 2. TF-IDF 활용한 빈도 분석
-  - https://needjarvis.tistory.com/678
-3. 더미데이터 생성 : ChatGPT
+    - https://needjarvis.tistory.com/678
+3. 강의 제목 & 설명 부분 더미데이터 생성 : ChatGPT
 <hr>
 
 
