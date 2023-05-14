@@ -33,7 +33,7 @@
   - Cosine Similarity로 유사도 분석하여 높은 순으로 연관 게시글 등록
   <br><br>
 #### 1. 적용 - DB설계
-![111](https://github.com/J-SSS/JDI_Board/assets/118149752/f5a0c3a7-274a-4f06-936e-31f8e8a30a6d)
+![111](https://github.com/J-SSS/JDI_Board/assets/118149752/fc01c46c-9be2-45c6-8643-197390642925)
   - 연관게시글 정보를 가진 relations 테이블 생성(이하 '<u style="color:white">R</u>'). <br> 외래키로 각 게시글의 PK를 지니고, 이를 유니크키로 하여 1:1관계로 설정
   - R 테이블의 terms 칼럼은 각 게시글 내용부분을 형태소 단위로 분석하여 명사만을 추출하여 저장한다
   - R 테이블의 tf_idf 칼럼은 terms 칼럼의 명사를 tf-idf로 분석하여 행렬화한 정보를 갖는다
